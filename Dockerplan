@@ -1,0 +1,36 @@
+#!/usr/bin/make -f
+
+PROJECT_NAME := arm-example
+
+# Include Docker magic
+include docker.mk
+
+CC   := arm-linux-gnueabihf-gcc
+QEMU := qemu-arm
+
+all: clean compile info run run-host
+
+#
+# This target will run inside the container environment
+#
+compile: SHELL := $(DOCKER_SHELL_TTY)
+compile:
+	$(CC) hello.c -o hello
+
+
+run: SHELL := $(DOCKER_SHELL_TTY)
+run:
+	@echo "Running program in container"
+	-@$(QEMU) hello
+
+run-host:
+	@echo "Running program on host."
+	@echo "This will *fail* unless your host has binfmt support for arm"
+	-@./hello
+
+info: SHELL := $(DOCKER_SHELL_TTY)
+info:
+	@file hello
+
+clean:
+	@rm -f hello
